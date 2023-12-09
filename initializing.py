@@ -17,7 +17,7 @@ df['Hydration'] = df['Hydration'] /512 #maximum hydration index
 X = df[df.columns[:-1]].values
 Y = df[df.columns[-1]].values
 
-test_data1 = np.array([[1,0,0.66,0.69,0.21,0.0,0.84,0.99,0.78]])
+test_data1 = np.array([[1,0,0.66,0.69,0.21,0.0,0.84,0.99,0.78]]) #initializing test data for model acuracy testing
 test_labels1 = np.array([[0]])
 
 test_data2 = np.array([[[1,0,0.66,0.69,0.21,0.5,0.0,0.99,0.78]]])
@@ -29,16 +29,17 @@ test_labels3 = np.array([[0]])
 test_data4 = np.array([[[1,0,0.66,0.69,0.21,0.5,0.84,0.99,0.78]]])
 test_labels4 = np.array([[1]])
 
-
+#creating neural network, defining inputs, layers, and outputs
 model = keras.Sequential([
                 keras.layers.Dense(5, activation="sigmoid"),
                 keras.layers.Dense(10, activation="sigmoid"),
                 keras.layers.Dense(5, activation="sigmoid"),
                 keras.layers.Dense(1, activation="sigmoid")
             ])
+#training model with collected data
 model.compile(loss="mean_squared_error", metrics=["accuracy"])
 model.fit(X, Y, epochs=20)
-
+#printing test results
 test_acc = model.evaluate(test_data1, test_labels1)
 print("Test Acc = ", test_acc)
 
