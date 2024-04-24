@@ -7,6 +7,8 @@ You will need to use pip to install the following packages to run this code:
 
 -numpy
 
-The initializing.py script will create a .keras machine learning model with the data in the associated csv
+-PySerial
 
-The retraining.py file will load and update the previously created .keras with the data in the associated csv
+-Regex
+
+-PyQt5
