@@ -1,17 +1,20 @@
 import sys
+import os
+import shutil
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QModelIndex, QObject, Qt
-from PyQt5.QtWidgets import QDialog, QApplication
+from PyQt5.QtWidgets import QMainWindow, QApplication, QDialog, QVBoxLayout
 from PyQt5.uic import loadUi
-from PyQt5.QtGui import QDoubleValidator
 import pandas as pd
 
 df = pd.read_csv('profiles/profiles.csv')
 
+src = r'C:\SeniorDesign\gui\PhysicalDistressMonitor\keras\baseline.keras'
+
 class Register(QDialog):
-    def __init__(self):
-        super(Register, self).__init__()
-        loadUi('uis/register_profile.ui', self)
+    def __init__(self, parent=None):
+        super(Register, self).__init__(parent)
+        loadUi('uis/register_dialog.ui', self)
         self.registerButton.clicked.connect(self.registerFunction)
 
         # Only allows up to 3 ints to be input
@@ -20,17 +23,56 @@ class Register(QDialog):
         self.weightLine.setInputMask('000')
 
     def registerFunction(self):
-        newEntry = {
-            'name': self.nameLine.text(),
-            'height': int(self.heightLine.text()),
-            'weight': int(self.weightLine.text())
-        }
+        name = self.nameLine.text()
+        height = self.heightLine.text()
+        weight = self.weightLine.text()
 
-        if len(df.index) < 20:
-            print('Thank you for registering ' + newEntry['name'])
-            df.loc[len(df.index)] = newEntry
-            print(df)
-            df.to_csv('profiles/profiles.csv', index=False)
+        if not name and not height and not weight:
+            print('Please input valid values')
+        else:
+            newEntry = {
+                'name': name,
+                'height': height,
+                'weight': weight
+            }
+
+            if len(df.index) < 20:
+                print('Thank you for registering ' + newEntry['name'])
+                df.loc[len(df.index)] = newEntry
+                print(df)
+                df.to_csv('profiles/profiles.csv', index=False)
+
+                dest = r'C:\SeniorDesign\gui\PhysicalDistressMonitor\keras'
+                dest = dest + '\\' + name + '.keras'
+
+                shutil.copyfile(src, dest)
+
+                dialog = Profiles(self)
+                dialog.setWindowTitle('Register')
+                dialog.exec()
+
+class Profiles(QDialog):
+    def __init__(self, parent):
+        super().__init__(parent)
+
+        self.layout = QVBoxLayout(self)
+        self.setStyleSheet('background-color:rgb(54, 54, 54)')
+
+        for i in range(0, len(df.index)):
+            button = QtWidgets.QPushButton(f'button {i}')
+            button.setStyleSheet('background-color:rgb(255, 255, 255); font-size:20pt')
+            # button.setText(df.loc[i])
+            # button.setFixedHeight(50)
+            self.layout.addWidget(button)
+
+        exitButton = QtWidgets.QPushButton('Register Now')
+        exitButton.clicked.connect(self.closeFunction)
+        self.layout.addWidget(exitButton)
+
+    def closeFunction(self):
+        # QApplication.closeAllWindows()
+
+        self.close()
 
 app = QApplication(sys.argv)
 mainwindow = Register()

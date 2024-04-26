@@ -22,8 +22,12 @@ class Profiles(QDialog):
             button.setFixedHeight(50)
             self.layout.addWidget(button)
 
-        exitButton = QtWidgets.QPushButton('Exit')
+        exitButton = QtWidgets.QPushButton('Register Now')
+        exitButton.clicked.connect(self.closeFunction)
         self.layout.addWidget(exitButton)
+
+    def closeFunction(self):
+        QApplication.closeAllWindows()
 
 profiles = {
     'name': ['Marshall', 'Ali', 'Javier', 'Nick', 'Josh', 'Mo'],
