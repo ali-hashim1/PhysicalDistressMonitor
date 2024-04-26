@@ -7,7 +7,9 @@ import re
 import sys
 import PyQt5
 import serial
+import shutil
 
+from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import QPixmap
@@ -18,6 +20,9 @@ serialObj = serial.Serial()
 liveData = [0,0,0,0]
 model = tf.keras.models.load_model('keras/baseline.keras')
 
+df = pd.read_csv('profiles/profiles.csv')
+
+src = r'C:\SeniorDesign\gui\PhysicalDistressMonitor\keras\baseline.keras'
 
 def readSerial():
     global liveData
@@ -36,6 +41,10 @@ class startPage(QMainWindow):
        self.show()
        self.liveButton.clicked.connect(self.liveBtnClick)
        self.trainButton.clicked.connect(self.trainBtnClick)
+       
+       dialog = Register(self)
+       dialog.setWindowTitle('Register')
+       dialog.exec()
 
     def liveBtnClick(self):
         QApplication.closeAllWindows()
@@ -189,6 +198,69 @@ class liveMode(QMainWindow):
         # Assuming risk_value needs to be an integer for the GUI component
         risk_value = int(risk_value * 100)  # Scale the prediction value appropriately if needed
         self.risk.setValue(risk_value)  # Set the integer value to the GUI component
+
+class Register(QDialog):
+    def __init__(self, parent=None):
+        super(Register, self).__init__(parent)
+        uic.loadUi('uis/register_dialog.ui', self)
+        self.registerButton.clicked.connect(self.registerFunction)
+
+        # Only allows up to 3 ints to be input
+        # Weird bug right now will have to fix eventually
+        self.heightLine.setInputMask('000')
+        self.weightLine.setInputMask('000')
+
+    def registerFunction(self):
+        name = self.nameLine.text()
+        height = self.heightLine.text()
+        weight = self.weightLine.text()
+
+        if not name and not height and not weight:
+            print('Please input valid values')
+        else:
+            newEntry = {
+                'name': name,
+                'height': height,
+                'weight': weight
+            }
+
+            if len(df.index) < 20:
+                print('Thank you for registering ' + newEntry['name'])
+                df.loc[len(df.index)] = newEntry
+                print(df)
+                df.to_csv('profiles/profiles.csv', index=False)
+
+                dest = r'C:\SeniorDesign\gui\PhysicalDistressMonitor\keras'
+                dest = dest + '\\' + name + '.keras'
+
+                shutil.copyfile(src, dest)
+
+                dialog = Profiles(self)
+                dialog.setWindowTitle('Register')
+                dialog.exec()
+
+class Profiles(QDialog):
+    def __init__(self, parent):
+        super().__init__(parent)
+
+        self.layout = QVBoxLayout(self)
+        self.setStyleSheet('background-color:rgb(54, 54, 54)')
+
+        for i in range(0, len(df.index)):
+            button = QtWidgets.QPushButton(f'button {i}')
+            button.setStyleSheet('background-color:rgb(255, 255, 255); font-size:20pt')
+            # button.setText(df.loc[i])
+            # button.setFixedHeight(50)
+            self.layout.addWidget(button)
+
+        exitButton = QtWidgets.QPushButton('Register Now')
+        exitButton.clicked.connect(self.closeFunction)
+        self.layout.addWidget(exitButton)
+
+    def closeFunction(self):
+        # QApplication.closeAllWindows()
+
+        self.close()
 
 
 app = QApplication([])

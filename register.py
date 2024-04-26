@@ -7,6 +7,13 @@ from PyQt5.QtWidgets import QMainWindow, QApplication, QDialog, QVBoxLayout
 from PyQt5.uic import loadUi
 import pandas as pd
 
+dfExists = os.path.isfile(r'C:\SeniorDesign\gui\PhysicalDistressMonitor\profiles\profiles.csv')
+
+if not dfExists:
+    f = open(r'C:\SeniorDesign\gui\PhysicalDistressMonitor\profiles\profiles.csv', 'w')
+    f.write('name,height,weight')
+    f.close()
+
 df = pd.read_csv('profiles/profiles.csv')
 
 src = r'C:\SeniorDesign\gui\PhysicalDistressMonitor\keras\baseline.keras'
@@ -47,12 +54,10 @@ class Register(QDialog):
 
                 shutil.copyfile(src, dest)
 
-                dialog = Profiles(self)
-                dialog.setWindowTitle('Register')
-                dialog.exec()
+                self.close()
 
 class Profiles(QDialog):
-    def __init__(self, parent):
+    def __init__(self, parent=None):
         super().__init__(parent)
 
         self.layout = QVBoxLayout(self)
@@ -61,24 +66,28 @@ class Profiles(QDialog):
         for i in range(0, len(df.index)):
             button = QtWidgets.QPushButton(f'button {i}')
             button.setStyleSheet('background-color:rgb(255, 255, 255); font-size:20pt')
-            # button.setText(df.loc[i])
-            # button.setFixedHeight(50)
+            button.setText(df.loc[i]['name'])
+            button.setFixedHeight(50)
             self.layout.addWidget(button)
 
-        exitButton = QtWidgets.QPushButton('Register Now')
-        exitButton.clicked.connect(self.closeFunction)
-        self.layout.addWidget(exitButton)
+        registerButton = QtWidgets.QPushButton('Register Now')
+        registerButton.setStyleSheet('background-color:rgb(21, 96, 243); color:rgb(225, 225, 255); font-size:20pt')
+        registerButton.clicked.connect(self.registerFunction)
+        self.layout.addWidget(registerButton)
 
-    def closeFunction(self):
-        # QApplication.closeAllWindows()
+    def registerFunction(self):
+        dialog = Register(self)
+        dialog.setWindowTitle('Register')
+        dialog.setFixedHeight(600)
+        dialog.setFixedWidth(480)
+        dialog.exec()
 
         self.close()
 
 app = QApplication(sys.argv)
-mainwindow = Register()
+mainwindow = Profiles()
 widget = QtWidgets.QStackedWidget()
 widget.addWidget(mainwindow)
-widget.setFixedHeight(600)
 widget.setFixedWidth(480)
 widget.show()
 app.exec()

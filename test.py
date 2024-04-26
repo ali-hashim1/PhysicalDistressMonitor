@@ -1,10 +1,15 @@
-import sys
+import sys, os
 import pandas as pd
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QApplication, QVBoxLayout
 from PyQt5.uic import loadUi
 from PyQt5.QtGui import QPalette, QColor
+
+# print(os.path.isfile(r'C:\SeniorDesign\gui\PhysicalDistressMonitor\profiles\profiles.csv'))
+
+# f = open(r'C:\SeniorDesign\gui\PhysicalDistressMonitor\profiles\profiles.csv', 'a')
+# print(f)
 
 class Profiles(QDialog):
     def __init__(self, profiles):
