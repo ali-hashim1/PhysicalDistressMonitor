@@ -55,4 +55,4 @@ print("Target = ", 100*test_labels3, "Prediction = ", 100*prediction3)
 prediction4 = model.predict(test_data4)
 print("Target = ", 100*test_labels4, "Prediction = ", 100*prediction4)
 
-model.save('physical_risk_prediction.keras')
+model.save('keras/baseline.keras')

@@ -16,7 +16,7 @@ from PyQt5 import uic
 ports = serial.tools.list_ports.comports()
 serialObj = serial.Serial()
 liveData = [0,0,0,0]
-model = tf.keras.models.load_model('physical_risk_prediction.keras')
+model = tf.keras.models.load_model('keras/baseline.keras')
 
 
 def readSerial():
