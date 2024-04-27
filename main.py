@@ -4,7 +4,7 @@ from tensorflow import keras
 import numpy as np
 import serial.tools.list_ports
 import re
-import sys
+import sys, os
 import PyQt5
 import serial
 import shutil
@@ -18,7 +18,15 @@ from PyQt5 import uic
 ports = serial.tools.list_ports.comports()
 serialObj = serial.Serial()
 liveData = [0,0,0,0]
-model = tf.keras.models.load_model('keras/baseline.keras')
+# model = tf.keras.models.load_model('keras/baseline.keras')
+model = None
+
+dfExists = os.path.isfile(r'C:\SeniorDesign\gui\PhysicalDistressMonitor\profiles\profiles.csv')
+
+if not dfExists:
+    f = open(r'C:\SeniorDesign\gui\PhysicalDistressMonitor\profiles\profiles.csv', 'w')
+    f.write('name,height,weight')
+    f.close()
 
 df = pd.read_csv('profiles/profiles.csv')
 
@@ -42,8 +50,9 @@ class startPage(QMainWindow):
        self.liveButton.clicked.connect(self.liveBtnClick)
        self.trainButton.clicked.connect(self.trainBtnClick)
        
-       dialog = Register(self)
-       dialog.setWindowTitle('Register')
+       dialog = Profiles(self)
+       dialog.setWindowTitle('Select Profile')
+       dialog.setFixedWidth(480)
        dialog.exec()
 
     def liveBtnClick(self):
@@ -205,8 +214,7 @@ class Register(QDialog):
         uic.loadUi('uis/register_dialog.ui', self)
         self.registerButton.clicked.connect(self.registerFunction)
 
-        # Only allows up to 3 ints to be input
-        # Weird bug right now will have to fix eventually
+        # Mask is janky need different way to require int input
         self.heightLine.setInputMask('000')
         self.weightLine.setInputMask('000')
 
@@ -227,38 +235,50 @@ class Register(QDialog):
             if len(df.index) < 20:
                 print('Thank you for registering ' + newEntry['name'])
                 df.loc[len(df.index)] = newEntry
-                print(df)
                 df.to_csv('profiles/profiles.csv', index=False)
 
                 dest = r'C:\SeniorDesign\gui\PhysicalDistressMonitor\keras'
                 dest = dest + '\\' + name + '.keras'
 
                 shutil.copyfile(src, dest)
-
-                dialog = Profiles(self)
-                dialog.setWindowTitle('Register')
-                dialog.exec()
+            else:
+                print('Maximum number of profiles')
+            
+            self.close()
 
 class Profiles(QDialog):
-    def __init__(self, parent):
+    def __init__(self, parent=None):
         super().__init__(parent)
 
         self.layout = QVBoxLayout(self)
         self.setStyleSheet('background-color:rgb(54, 54, 54)')
 
         for i in range(0, len(df.index)):
+            name = df.loc[i]['name']
+
             button = QtWidgets.QPushButton(f'button {i}')
             button.setStyleSheet('background-color:rgb(255, 255, 255); font-size:20pt')
-            # button.setText(df.loc[i])
-            # button.setFixedHeight(50)
+            button.setText(name)
+            button.setFixedHeight(50)
+            button.clicked.connect(lambda checked, profile=name : self.loginFunction(profile))
             self.layout.addWidget(button)
 
-        exitButton = QtWidgets.QPushButton('Register Now')
-        exitButton.clicked.connect(self.closeFunction)
-        self.layout.addWidget(exitButton)
+        registerButton = QtWidgets.QPushButton('Register Now')
+        registerButton.setStyleSheet('background-color:rgb(21, 96, 243); color:rgb(225, 225, 255); font-size:20pt')
+        registerButton.clicked.connect(self.registerFunction)
+        self.layout.addWidget(registerButton)
 
-    def closeFunction(self):
-        # QApplication.closeAllWindows()
+    def registerFunction(self):
+        dialog = Register(self)
+        dialog.setWindowTitle('Register')
+        dialog.setFixedHeight(600)
+        dialog.setFixedWidth(480)
+        dialog.exec()
+
+        self.close()
+
+    def loginFunction(self, profile):
+        model = tf.keras.models.load_model(f'keras/{profile}.keras')
 
         self.close()
 

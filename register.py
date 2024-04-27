@@ -69,7 +69,7 @@ class Profiles(QDialog):
             button.setStyleSheet('background-color:rgb(255, 255, 255); font-size:20pt')
             button.setText(name)
             button.setFixedHeight(50)
-            button.clicked.connect(self.loginFunction(name))
+            button.clicked.connect(lambda checked, profile=name : self.loginFunction(profile))
             self.layout.addWidget(button)
 
         registerButton = QtWidgets.QPushButton('Register Now')
