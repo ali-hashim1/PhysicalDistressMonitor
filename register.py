@@ -46,7 +46,6 @@ class Register(QDialog):
             if len(df.index) < 20:
                 print('Thank you for registering ' + newEntry['name'])
                 df.loc[len(df.index)] = newEntry
-                print(df)
                 df.to_csv('profiles/profiles.csv', index=False)
 
                 dest = r'C:\SeniorDesign\gui\PhysicalDistressMonitor\keras'
@@ -64,10 +63,13 @@ class Profiles(QDialog):
         self.setStyleSheet('background-color:rgb(54, 54, 54)')
 
         for i in range(0, len(df.index)):
+            name = df.loc[i]['name']
+
             button = QtWidgets.QPushButton(f'button {i}')
             button.setStyleSheet('background-color:rgb(255, 255, 255); font-size:20pt')
-            button.setText(df.loc[i]['name'])
+            button.setText(name)
             button.setFixedHeight(50)
+            button.clicked.connect(self.loginFunction(name))
             self.layout.addWidget(button)
 
         registerButton = QtWidgets.QPushButton('Register Now')
@@ -83,6 +85,10 @@ class Profiles(QDialog):
         dialog.exec()
 
         self.close()
+
+    def loginFunction(self, profile):
+        model = profile
+        print(model)
 
 app = QApplication(sys.argv)
 mainwindow = Profiles()
